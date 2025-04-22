@@ -1,0 +1,68 @@
+.editar-cultivo-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .editar-cultivo-container h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+  }
+  
+  .editar-cultivo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .editar-cultivo-form label {
+    font-weight: bold;
+    text-align: left;
+  }
+  
+  .editar-cultivo-form input,
+  .editar-cultivo-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .editar-cultivo-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .editar-cultivo-buttons button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+  
+  .editar-cultivo-buttons .guardar {
+    background-color: #27ae60;
+    color: white;
+  }
+  
+  .editar-cultivo-buttons .guardar:hover {
+    background-color: #218c54;
+  }
+  
+  .editar-cultivo-buttons .cancelar {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .editar-cultivo-buttons .cancelar:hover {
+    background-color: #c0392b;
+  }
+  

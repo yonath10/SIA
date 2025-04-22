@@ -1,0 +1,106 @@
+.grafico-container {
+
+  margin: 40px auto;
+  padding: 2rem;
+  text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.recomendacion {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  color: #d35400;
+  padding: 1rem;
+  background-color: #fff3e0;
+  border-radius: 5px;
+  display: inline-block;
+  white-space: pre-line; /* Permite saltos de línea en el mensaje de recomendación */
+}
+
+.calendario-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.calendario-item {
+  margin: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.calendario-item label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.react-datepicker-wrapper {
+  display: block;
+}
+
+.mensaje-sin-datos {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #d35400;
+}
+
+/* Estilos para la gráfica */
+.recharts-cartesian-axis-tick-value text {
+  font-size: 0.9rem;
+  fill: #333;
+}
+
+.recharts-legend-item-text {
+  font-size: 0.9rem;
+  fill: #333;
+}
+
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  font-size: 0.9rem;
+  fill: #333;
+}
+
+.calendario-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.calendario-item {
+  margin: 0 1rem;
+  display: flex; /* Alinea la etiqueta y el DatePicker en una fila */
+  flex-direction: column; /* Alinea los elementos en columna en pantallas pequeñas */
+  align-items: center; /* Centra los elementos horizontalmente */
+}
+
+.calendario-item label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.react-datepicker-wrapper {
+  display: block;
+}
+
+.mensaje-sin-datos {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #d35400;
+}

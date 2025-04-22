@@ -1,0 +1,80 @@
+.home-container {
+  text-align: center;
+  padding: 50px;
+  background-color: #f4f4f4;
+  font-family: 'Arial', sans-serif;
+  position: relative; /* Añadimos posición relativa al contenedor principal */
+}
+
+.home-container h1 {
+  color: #333;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.home-container p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+.home-buttons {
+  position: absolute; /* Posicionamos los botones de forma absoluta */
+  top: 20px; /* Ajusta la distancia desde la parte superior */
+  right: 20px; /* Ajusta la distancia desde la derecha */
+  display: flex; /* Usamos flexbox para alinear los botones */
+}
+
+.home-buttons button {
+  padding: 10px 20px; /* Reducimos el padding */
+  font-size: 0.9rem; /* Reducimos el tamaño de la fuente */
+  margin: 0 5px; /* Reducimos el margen */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.home-buttons button:hover {
+  background-color: #45a049;
+}
+
+.home-benefits {
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.home-benefits h2 {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.benefit-item {
+  text-align: left;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.benefit-item h3 {
+  color: #333;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.benefit-item p {
+  color: #666;
+  font-size: 1rem;
+}

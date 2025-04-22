@@ -1,0 +1,52 @@
+/* src/pages/Estadisticas.css */
+
+.estadisticas-container {
+    padding: 20px;
+    font-family: sans-serif;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.estadisticas-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.estadisticas-container h3 {
+    margin-top: 25px;
+    color: #34495e;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.estadisticas-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.estadisticas-container li {
+    padding: 15px;
+    border-bottom: 1px solid #ecf0f1;
+    background-color: #fff;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s ease;
+}
+
+.estadisticas-container li:hover {
+    background-color: #f0f0f0;
+}
+
+.estadisticas-container li:last-child {
+    border-bottom: none;
+}
+
+.estadisticas-container p {
+    font-size: 1.1em;
+    color: #777;
+}

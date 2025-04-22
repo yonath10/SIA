@@ -1,0 +1,30 @@
+# Ignorar node_modules en la raíz y en las subcarpetas
+node_modules
+sia-front/node_modules
+back/node_modules
+
+# Ignorar la carpeta de construcción de React
+sia-front/build
+
+# Ignorar posibles carpetas de construcción del backend
+back/build
+back/dist
+
+# Archivos de entorno
+.env
+sia-front/.env
+back/.env
+
+# Archivos de bloqueo de paquetes (¡Incluir!)
+package-lock.json
+sia-front/package-lock.json
+back/package-lock.json
+yarn.lock
+sia-front/yarn.lock
+back/yarn.lock
+
+# IDEs
+.vscode
+
+# Logs
+*.log

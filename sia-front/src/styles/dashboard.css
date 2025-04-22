@@ -1,0 +1,67 @@
+/* Estilo general del dashboard */
+.dashboard-container {
+  max-width: 80%;
+  margin: 40px auto;
+  text-align: center;
+  padding: 2rem; /* Ajuste del padding */
+  border-radius: 8px; /* Ajuste del borde redondeado */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+  position: relative;
+  background-color: #f4f4f4; /* Fondo ligeramente gris para consistencia */
+}
+
+/* Estilo del título */
+h2 {
+  font-size: 2rem; /* Ajuste del tamaño de la fuente */
+  color: #333;
+  margin-bottom: 1.5rem; /* Ajuste del margen */
+  text-transform: uppercase; /* Título en mayúsculas */
+  letter-spacing: 1px; /* Espaciado entre letras */
+}
+
+/* Estilo de la tabla */
+.cultivo-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cultivo-table th,
+.cultivo-table td {
+  padding: 1rem 1.2rem; /* Ajuste del padding */
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.cultivo-table th {
+  background-color: #333; /* Color de fondo similar al navbar */
+  color: white;
+  text-transform: uppercase;
+  font-weight: 600; /* Peso de la fuente más fuerte */
+}
+
+.cultivo-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.cultivo-table tr:hover {
+  background-color: #e3f2fd;
+  transition: background-color 0.3s ease; /* Transición suave */
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .dashboard-container {
+    max-width: 95%;
+    padding: 1.5rem; /* Ajuste del padding */
+  }
+
+  .cultivo-table th,
+  .cultivo-table td {
+    padding: 0.8rem; /* Ajuste del padding */
+    font-size: 0.9rem; /* Ajuste del tamaño de la fuente */
+  }
+}
