@@ -8,6 +8,8 @@ const userRoutes = require("./routes/UserRoutes");
 const cultivoRoutes = require("./routes/CultivoRoutes");
 const statsRoutes = require("./routes/StatsRoutes");
 const utilsRoutes = require("./routes/utilsRoutes");
+const suscripcionRoutes = require("./routes/suscripcionRoutes");
+const rendimientoRoutes = require("./routes/rendimientoRoutes");
 const cors = require("cors"); // Importar cors
 
 const app = express();
@@ -27,8 +29,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/cultivos", cultivoRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/utils", utilsRoutes);
-
-
+app.use("/api/suscripciones", suscripcionRoutes);
+app.use("/api/rendimientos", rendimientoRoutes);
 const PORT = process.env.PORT || 8000;
 
 

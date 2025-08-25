@@ -1,55 +1,55 @@
-import React, { useState } from "react"; // Importa useState desde React
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate, NavLink } from "react-router-dom"; // Usar NavLink para estilos activos
 import { setAuthToken } from "../api/api";
 
-
 function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false); // Ahora debería funcionar
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setAuthToken(null); // Elimina el token
-    navigate("/home"); // Redirige al login
+    setAuthToken(null);
+    navigate("/home");
   };
 
-  return (
-    <nav className="bg-white shadow-lg">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo o nombre de la app - opcional */}
-          <div className="flex-shrink-0">
-            <span className="text-xl font-bold text-indigo-600">SIA</span>
-          </div>
+  // Estilos para los enlaces, incluyendo el estado activo con NavLink
+  const linkStyles = "px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-green-700 hover:bg-green-50 transition-colors";
+  const activeLinkStyles = "bg-green-50 text-green-700";
 
-          {/* Menú para desktop - oculto en mobile */}
-          <div className="hidden md:flex space-x-4">
-            <Link
+  return (
+    <nav className="bg-white shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/dashboard" className="flex-shrink-0">
+            <span className="text-xl font-bold text-green-700">SIA</span>
+          </Link>
+
+          {/* Menú para desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            <NavLink
               to="/dashboard"
-              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}
             >
               Dashboard
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/crear-cultivo"
-              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}
             >
               Crear Cultivo
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/grafica"
-              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}
             >
               Gráfica
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/asesor"
-              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}
             >
               Asesor de Cosecha
-            </Link>
+            </NavLink>
             <button
               onClick={handleLogout}
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
@@ -58,15 +58,13 @@ function Navbar() {
             </button>
           </div>
 
-          {/* Botón de menú hamburguesa - solo visible en mobile */}
+          {/* Botón de menú hamburguesa */}
           <div className="md:hidden flex items-center">
             <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 focus:outline-none transition-colors"
-              aria-expanded="false"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-green-50 focus:outline-none transition-colors"
             >
               <span className="sr-only">Abrir menú</span>
-              {/* Icono de hamburguesa */}
               <div className="space-y-1.5">
                 <div className={`h-0.5 w-6 bg-current transform transition duration-300 ease-in-out ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
                 <div className={`h-0.5 w-6 bg-current transition duration-300 ease-in-out ${menuOpen ? 'opacity-0' : 'opacity-100'}`}></div>
@@ -77,42 +75,16 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Menú mobile - solo visible cuando está abierto */}
+      {/* Menú mobile */}
       <div className={`md:hidden ${menuOpen ? 'block' : 'hidden'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-          <Link
-            to="/dashboard"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-            onClick={() => setMenuOpen(false)}
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/crear-cultivo"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-            onClick={() => setMenuOpen(false)}
-          >
-            Crear Cultivo
-          </Link>
-          <Link
-            to="/grafica"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-            onClick={() => setMenuOpen(false)}
-          >
-            Gráfica
-          </Link>
-          <Link
-            to="/estadisticas"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-            onClick={() => setMenuOpen(false)}
-          >
-            Estadísticas
-          </Link>
+          {/* Se usan NavLinks aquí también para consistencia */}
+          <NavLink to="/dashboard" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}`} onClick={() => setMenuOpen(false)}>Dashboard</NavLink>
+          <NavLink to="/crear-cultivo" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}`} onClick={() => setMenuOpen(false)}>Crear Cultivo</NavLink>
+          <NavLink to="/grafica" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}`} onClick={() => setMenuOpen(false)}>Gráfica</NavLink>
+          <NavLink to="/asesor" className={({ isActive }) => `block px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-green-50 hover:text-green-700'}`} onClick={() => setMenuOpen(false)}>Asesor de Cosecha</NavLink>
           <button
-            onClick={() => {
-              handleLogout();
-              setMenuOpen(false);
-            }}
+            onClick={() => { handleLogout(); setMenuOpen(false); }}
             className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
             Cerrar Sesión

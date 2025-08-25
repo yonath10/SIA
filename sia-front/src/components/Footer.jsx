@@ -1,6 +1,33 @@
-import React from 'react';
+
+import React, { useState } from 'react'; // Importa useState
+import { api } from '../api/api'; // Importa tu instancia de api
 
 function Footer() {
+  const [email, setEmail] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [esExito, setEsExito] = useState(true);
+
+  const handleSuscripcion = async (e) => {
+    e.preventDefault();
+    setMensaje('');
+
+    if (!email) {
+      setMensaje('Por favor, ingresa un correo.');
+      setEsExito(false);
+      return;
+    }
+
+    try {
+      const response = await api.post('/suscripciones', { email });
+      setMensaje(response.data.message);
+      setEsExito(true);
+      setEmail(''); // Limpiar el input
+    } catch (error) {
+      setMensaje(error.response?.data?.message || 'Ocurrió un error.');
+      setEsExito(false);
+    }
+  };
+
   return (
     <footer className="bg-green-700 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -74,20 +101,27 @@ function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4 text-white border-b border-green-600 pb-2">Boletín</h4>
             <p className="text-sm text-green-100 mb-3">Suscríbete para recibir actualizaciones y consejos agrícolas.</p>
-            <form className="flex flex-col space-y-2">
-              <input 
-                type="email" 
-                placeholder="Tu correo electrónico" 
+            <form onSubmit={handleSuscripcion} className="flex flex-col space-y-2">
+              <input
+                type="email"
+                placeholder="Tu correo electrónico"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="px-3 py-2 text-sm text-gray-800 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded transition-colors"
               >
                 Suscribirse
               </button>
             </form>
+            {/* Mensaje de respuesta */}
+            {mensaje && (
+              <p className={`mt-2 text-sm font-bold ${esExito ? 'text-green-300' : 'text-red-300'}`}>
+                {mensaje}
+              </p>
+            )}
           </div>
         </div>
       </div>

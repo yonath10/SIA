@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from "react-router-dom";
+import Footer from '../components/Footer';
 
 const homeImageUrl = '/img/home.png'; 
 const logoUrl = '/img/sia.png'; 

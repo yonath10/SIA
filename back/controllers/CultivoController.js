@@ -1,47 +1,75 @@
 const Cultivo = require("../models/Cultivo");
-const User = require("../models/User");
 const moment = require("moment");
-const { Op, Sequelize } = require("sequelize"); // Asegúrate de importar Op y Sequelize
+const { Op, Sequelize } = require("sequelize");
 
+// Rendimiento promedio en kilogramos por metro cuadrado (kg/m²)
+// Esta es la "fuente de verdad" para los cálculos automáticos.
+const RENDIMIENTOS_PROMEDIO = {
+    Espinaca: 2.5,
+    Cilantro: 1.5,
+    Lechuga: 3.0,
+    Apio: 4.0,
+    Brócoli: 2.0,
+    Papa: 5.0,
+    Zanahoria: 4.5,
+    Remolacha: 3.5,
+    Maíz: 1.0,
+};
 
-//  Crear un nuevo cultivo
+/**
+ * Crea un nuevo cultivo.
+ * Si no se proporciona 'cantidad_estimado', lo calcula automáticamente
+ * basándose en el 'espacio_sembrado' y el rendimiento promedio del cultivo.
+ */
 const crearCultivo = async (req, res) => {
   try {
-    const { nombre, localizacion, espacio_sembrado, cantidad_estimado, fecha_siembra, tiempo_cosecha } = req.body;
-
-    // Obtén el userId del usuario autenticado
+    let { nombre, localizacion, espacio_sembrado, cantidad_estimado, fecha_siembra } = req.body;
     const userId = req.user.id;
 
-    const fecha_vencimiento = moment(fecha_siembra).add(tiempo_cosecha, "weeks").format("YYYY-MM-DD");
+    // --- LÓGICA DE CÁLCULO AUTOMÁTICO ---
+    // Verifica si la cantidad no fue enviada, pero sí el espacio y el cultivo es conocido.
+    if (!cantidad_estimado && espacio_sembrado && RENDIMIENTOS_PROMEDIO[nombre]) {
+      cantidad_estimado = espacio_sembrado * RENDIMIENTOS_PROMEDIO[nombre];
+    }
+
+    // Valida que los campos requeridos existan después del posible cálculo.
+    if (!nombre || !localizacion || !espacio_sembrado || !cantidad_estimado || !fecha_siembra) {
+        return res.status(400).json({ message: "Faltan campos requeridos para crear el cultivo." });
+    }
 
     const cultivo = await Cultivo.create({
       nombre,
       localizacion,
       espacio_sembrado,
-      cantidad_estimado,
+      cantidad_estimado, // Usa el valor original o el calculado
       fecha_siembra,
-      tiempo_cosecha,
-      fecha_vencimiento,
-      userId, // Usa el userId del usuario autenticado
+      userId,
     });
 
     res.status(201).json({ message: "Cultivo creado exitosamente", cultivo });
   } catch (error) {
-    res.status(500).json({ message: "Error al crear cultivo", error });
+    console.error("Error al crear cultivo:", error);
+    res.status(500).json({ message: "Error interno al crear el cultivo." });
   }
 };
 
-//  Obtener todos los cultivos
-const obtenerCultivos = async (req, res) => {
+/**
+ * Obtiene todos los cultivos (sin filtrar por usuario).
+ * Usado para las gráficas y proyecciones globales.
+ */
+const obtenerTodosLosCultivos = async (req, res) => {
   try {
     const cultivos = await Cultivo.findAll();
     res.json(cultivos);
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener cultivos", error });
+    res.status(500).json({ message: "Error al obtener todos los cultivos", error });
   }
 };
 
-//  Actualizar un cultivo
+
+/**
+ * Actualiza un cultivo existente por su ID.
+ */
 const actualizarCultivo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -49,6 +77,11 @@ const actualizarCultivo = async (req, res) => {
 
     if (!cultivo) {
       return res.status(404).json({ message: "Cultivo no encontrado" });
+    }
+
+    // Solo permite actualizar al dueño del cultivo
+    if (cultivo.userId !== req.user.id) {
+        return res.status(403).json({ message: "No tienes permiso para editar este cultivo." });
     }
 
     await cultivo.update(req.body);
@@ -59,7 +92,9 @@ const actualizarCultivo = async (req, res) => {
   }
 };
 
-//  Eliminar un cultivo
+/**
+ * Elimina un cultivo por su ID.
+ */
 const eliminarCultivo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -69,6 +104,11 @@ const eliminarCultivo = async (req, res) => {
       return res.status(404).json({ message: "Cultivo no encontrado" });
     }
 
+    // Solo permite eliminar al dueño del cultivo
+    if (cultivo.userId !== req.user.id) {
+        return res.status(403).json({ message: "No tienes permiso para eliminar este cultivo." });
+    }
+
     await cultivo.destroy();
 
     res.json({ message: "Cultivo eliminado exitosamente" });
@@ -76,21 +116,24 @@ const eliminarCultivo = async (req, res) => {
     res.status(500).json({ message: "Error al eliminar cultivo", error });
   }
 };
-// NUEVA FUNCIÓN PARA EL ASESOR DE SIEMBRA
+
+/**
+ * Proyecta la oferta de un cultivo en un mes futuro,
+ * basándose en una fecha de siembra opcional.
+ */
 const proyeccionCosecha = async (req, res) => {
-    const { nombre, semanas_cosecha } = req.query;
+    const { nombre, semanas_cosecha, fecha_siembra } = req.query;
 
     if (!nombre || !semanas_cosecha) {
         return res.status(400).json({ message: "Se requiere el nombre del cultivo y las semanas de cosecha." });
     }
 
     try {
-        // Calcula la fecha de cosecha futura sumando las semanas
-        const fechaCosechaProyectada = moment().add(semanas_cosecha, 'weeks');
-        const mes = fechaCosechaProyectada.month() + 1; // en moment(), los meses son de 0 a 11
+        const fechaBase = fecha_siembra ? moment(fecha_siembra) : moment();
+        const fechaCosechaProyectada = fechaBase.add(semanas_cosecha, 'weeks');
+        const mes = fechaCosechaProyectada.month() + 1;
         const anio = fechaCosechaProyectada.year();
 
-        // Busca todos los cultivos del mismo tipo que vencerán en el mismo mes y año
         const cultivosExistentes = await Cultivo.findAll({
             where: {
                 nombre: nombre,
@@ -101,7 +144,6 @@ const proyeccionCosecha = async (req, res) => {
             }
         });
 
-        // Suma la cantidad estimada para obtener la oferta proyectada
         const ofertaProyectada = cultivosExistentes.reduce((sum, cultivo) => sum + cultivo.cantidad_estimado, 0);
 
         res.json({
@@ -118,8 +160,8 @@ const proyeccionCosecha = async (req, res) => {
 
 module.exports = { 
     crearCultivo, 
-    obtenerCultivos, 
+    obtenerTodosLosCultivos, // Cambiado para reflejar su propósito
     actualizarCultivo, 
     eliminarCultivo,
-    proyeccionCosecha // Exporta la nueva función
+    proyeccionCosecha
 };
