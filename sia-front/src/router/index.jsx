@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import '../index.css';
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -7,8 +8,8 @@ import CrearCultivo from "../pages/CrearCultivo";
 import Grafica from "../pages/Grafica"; 
 import PrivateRoute from "./PrivateRoute";
 import EditarCultivo from "../pages/EditarCultivo";
-import Estadisticas from "../pages/Estadisticas";
-import Footer from "../components/Footer"; // Importa el componente Footer
+import Asesor from "../pages/AsesorDeSiembra";
+
 const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -21,14 +22,11 @@ const AppRouter = () => {
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/editarCultivo/:id" element={<PrivateRoute><EditarCultivo /></PrivateRoute>} />
         <Route path="/grafica" element={<PrivateRoute><Grafica /></PrivateRoute>} />
-        <Route path="/crear-cultivo" element={<PrivateRoute><CrearCultivo /></PrivateRoute>} /> {/* ✅ Nueva Ruta */}
-        <Route path="/estadisticas" element={<PrivateRoute><Estadisticas /></PrivateRoute>} /> {/* ✅ Nueva Ruta */}
+        <Route path="/crear-cultivo" element={<PrivateRoute><CrearCultivo /></PrivateRoute>} /> 
+        <Route path="/asesor" element={<PrivateRoute><Asesor /></PrivateRoute>} /> 
       </Routes>
-      <Footer /> 
       
       
-      
-
     </BrowserRouter>
   );
 };

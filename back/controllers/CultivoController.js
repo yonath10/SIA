@@ -1,6 +1,7 @@
 const Cultivo = require("../models/Cultivo");
 const User = require("../models/User");
 const moment = require("moment");
+const { Op, Sequelize } = require("sequelize"); // Asegúrate de importar Op y Sequelize
 
 
 //  Crear un nuevo cultivo
@@ -30,7 +31,7 @@ const crearCultivo = async (req, res) => {
   }
 };
 
-// 📌 Obtener todos los cultivos
+//  Obtener todos los cultivos
 const obtenerCultivos = async (req, res) => {
   try {
     const cultivos = await Cultivo.findAll();
@@ -40,7 +41,7 @@ const obtenerCultivos = async (req, res) => {
   }
 };
 
-// 📌 Actualizar un cultivo
+//  Actualizar un cultivo
 const actualizarCultivo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -58,7 +59,7 @@ const actualizarCultivo = async (req, res) => {
   }
 };
 
-// 📌 Eliminar un cultivo
+//  Eliminar un cultivo
 const eliminarCultivo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -75,5 +76,50 @@ const eliminarCultivo = async (req, res) => {
     res.status(500).json({ message: "Error al eliminar cultivo", error });
   }
 };
+// NUEVA FUNCIÓN PARA EL ASESOR DE SIEMBRA
+const proyeccionCosecha = async (req, res) => {
+    const { nombre, semanas_cosecha } = req.query;
 
-module.exports = { crearCultivo, obtenerCultivos, actualizarCultivo, eliminarCultivo };
+    if (!nombre || !semanas_cosecha) {
+        return res.status(400).json({ message: "Se requiere el nombre del cultivo y las semanas de cosecha." });
+    }
+
+    try {
+        // Calcula la fecha de cosecha futura sumando las semanas
+        const fechaCosechaProyectada = moment().add(semanas_cosecha, 'weeks');
+        const mes = fechaCosechaProyectada.month() + 1; // en moment(), los meses son de 0 a 11
+        const anio = fechaCosechaProyectada.year();
+
+        // Busca todos los cultivos del mismo tipo que vencerán en el mismo mes y año
+        const cultivosExistentes = await Cultivo.findAll({
+            where: {
+                nombre: nombre,
+                [Op.and]: [
+                    Sequelize.where(Sequelize.fn('EXTRACT', Sequelize.literal('MONTH FROM fecha_vencimiento')), mes),
+                    Sequelize.where(Sequelize.fn('EXTRACT', Sequelize.literal('YEAR FROM fecha_vencimiento')), anio),
+                ]
+            }
+        });
+
+        // Suma la cantidad estimada para obtener la oferta proyectada
+        const ofertaProyectada = cultivosExistentes.reduce((sum, cultivo) => sum + cultivo.cantidad_estimado, 0);
+
+        res.json({
+            cultivo: nombre,
+            fechaProyectada: fechaCosechaProyectada.format('YYYY-MM-DD'),
+            ofertaProyectadaKg: ofertaProyectada
+        });
+
+    } catch (error) {
+        console.error("Error en la proyección:", error);
+        res.status(500).json({ message: "Error al calcular la proyección." });
+    }
+};
+
+module.exports = { 
+    crearCultivo, 
+    obtenerCultivos, 
+    actualizarCultivo, 
+    eliminarCultivo,
+    proyeccionCosecha // Exporta la nueva función
+};

@@ -7,12 +7,13 @@ const sequelize = require("./config/db");
 const userRoutes = require("./routes/UserRoutes");
 const cultivoRoutes = require("./routes/CultivoRoutes");
 const statsRoutes = require("./routes/StatsRoutes");
+const utilsRoutes = require("./routes/utilsRoutes");
 const cors = require("cors"); // Importar cors
 
 const app = express();
 app.use(express.json());
 
-// ✅ Configurar CORS
+//  Configurar CORS
 const corsOptions = {
   origin: "http://localhost:5173", // URL del frontend
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -25,6 +26,7 @@ app.use(cors(corsOptions));
 app.use("/api/users", userRoutes);
 app.use("/api/cultivos", cultivoRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/utils", utilsRoutes);
 
 
 const PORT = process.env.PORT || 8000;
@@ -33,28 +35,27 @@ const PORT = process.env.PORT || 8000;
 // Función para eliminar cultivos vencidos
 async function eliminarCultivosVencidos() {
   try {
-    const hoy = moment().format("YYYY-MM-DD"); // Fecha actual en formato adecuado
+    const hoy = moment().format("YYYY-MM-DD"); 
     console.log(`🔍 Verificando cultivos vencidos para eliminar (${hoy})...`);
 
     const eliminados = await Cultivo.destroy({
       where: {
         fecha_vencimiento: {
-          [Op.lte]: hoy, // Menor o igual a hoy
+          [Op.lte]: hoy, 
         },
       },
     });
 
     if (eliminados > 0) {
-      console.log(`✅ Se eliminaron ${eliminados} cultivos vencidos.`);
+      console.log(` Se eliminaron ${eliminados} cultivos vencidos.`);
     } else {
-      console.log("⚠️ No hay cultivos vencidos para eliminar.");
+      console.log(" No hay cultivos vencidos para eliminar.");
     }
   } catch (error) {
-    console.error("❌ Error eliminando cultivos vencidos:", error);
+    console.error(" Error eliminando cultivos vencidos:", error);
   }
 }
 
-// Ejecutar cada 24 horas
 setInterval(eliminarCultivosVencidos, 24 * 60 * 60 * 1000);
 
 // Ejecutar una vez al iniciar el servidor
@@ -64,5 +65,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor  en http://localhost:${PORT}`);
 });

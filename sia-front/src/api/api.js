@@ -7,7 +7,7 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// ✅ Función para establecer o eliminar el token
+// Función para establecer o eliminar el token
 export const setAuthToken = (token) => {
   if (token) {
     localStorage.setItem("token", token);

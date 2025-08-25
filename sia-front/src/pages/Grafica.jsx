@@ -1,169 +1,166 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../api/api";
 import Navbar from "../components/Navbar";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../styles/grafica.css";
 
+// --- Configuración ---
 const cultivosEsperados = [
     "Espinaca", "Cilantro", "Lechuga", "Apio", "Brócoli", "Papa",
     "Zanahoria", "Remolacha", "Maíz"
 ];
+const UMBRAL_PRODUCCION_BAJA = 20; // en kg
 
 const Grafica = () => {
-    const [datosCultivo, setDatosCultivo] = useState([]);
+    const [datosGrafica, setDatosGrafica] = useState([]);
     const [mensajeRecomendacion, setMensajeRecomendacion] = useState("");
-    const [fechaInicio, setFechaInicio] = useState(new Date(2025, 2, 1));
-    const [fechaFin, setFechaFin] = useState(new Date(2025, 2, 31, 23, 59, 59, 999));
+    const [fechaInicio, setFechaInicio] = useState(new Date("2025-03-01T00:00:00"));
+    const [fechaFin, setFechaFin] = useState(new Date("2025-03-31T23:59:59"));
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const obtenerCultivos = async () => {
+        const obtenerYProcesarCultivos = async () => {
+            setIsLoading(true);
             try {
-                const token = localStorage.getItem("token");
-                if (token) {
-                    const response = await api.get("/cultivos/obtenerCultivos", {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    const { data } = response;
+                // CORRECCIÓN: Usar el endpoint público que trae TODOS los cultivos
+                const response = await api.get("/cultivos/todosCultivos");
+                const todosLosCultivos = response.data;
 
-                    const cultivosFiltrados = data.filter(cultivo => {
-                        const fechaParts = cultivo.fecha_vencimiento.split("-");
-                        const year = parseInt(fechaParts[0]);
-                        const month = parseInt(fechaParts[1]) - 1;
-                        const day = parseInt(fechaParts[2]);
-                        const fechaCosecha = new Date(year, month, day);
+                const cultivosFiltrados = todosLosCultivos.filter(cultivo => {
+                    const fechaCosecha = new Date(cultivo.fecha_vencimiento);
+                    return fechaCosecha >= fechaInicio && fechaCosecha <= fechaFin;
+                });
 
-                        return fechaCosecha >= fechaInicio && fechaCosecha <= fechaFin;
-                    });
-
-                    if (cultivosFiltrados.length === 0) {
-                        setDatosCultivo([]);
-                        setMensajeRecomendacion("No hay cultivos para el período seleccionado.");
-                        return;
-                    }
-
-                    const cultivosAgrupados = cultivosFiltrados.reduce((acc, cultivo) => {
-                        const mesCosecha = new Date(cultivo.fecha_vencimiento).toLocaleString("es-ES", { month: "long" });
-                        if (!acc[mesCosecha]) acc[mesCosecha] = {};
-                        acc[mesCosecha][cultivo.nombre] = (acc[mesCosecha][cultivo.nombre] || 0) + cultivo.cantidad_estimado;
-                        return acc;
-                    }, {});
-
-                    const datos = Object.entries(cultivosAgrupados).map(([mes, cultivos]) => {
-                        let entry = { mes };
-                        let faltantes = [];
-
-                        cultivosEsperados.forEach((cultivo) => {
-                            if (!cultivos[cultivo] || cultivos[cultivo] < 5) {
-                                faltantes.push(cultivo);
-                                entry[`Falta: ${cultivo}`] = 5;
-                            } else {
-                                entry[cultivo] = cultivos[cultivo];
-                            }
-                        });
-
-                        return entry;
-                    });
-
-                    // Calcular tiempo_cosecha en el frontend
-                    const datosConTiempoCosecha = cultivosFiltrados.map(cultivo => {
-                        const fechaSiembra = new Date(cultivo.fecha_siembra);
-                        const fechaVencimiento = new Date(cultivo.fecha_vencimiento);
-                        const tiempoCosecha = Math.round((fechaVencimiento - fechaSiembra) / (1000 * 60 * 60 * 24)); // Días
-
-                        return {
-                            ...cultivo,
-                            tiempo_cosecha: tiempoCosecha,
-                        };
-                    });
-
-                    setDatosCultivo(datos);
-
-                    const recomendaciones = analizarTendencias(datos);
-                    setMensajeRecomendacion(recomendaciones);
-                } else {
-                    console.error("Token no encontrado en el almacenamiento local.");
+                if (cultivosFiltrados.length === 0) {
+                    setDatosGrafica([]);
+                    setMensajeRecomendacion("No hay datos de cosechas para el período seleccionado.");
+                    return;
                 }
+
+                const produccionPorMes = cultivosFiltrados.reduce((acc, cultivo) => {
+                    const mes = new Date(cultivo.fecha_vencimiento).toLocaleString("es-ES", { month: "long" });
+                    if (!acc[mes]) acc[mes] = {};
+                    acc[mes][cultivo.nombre] = (acc[mes][cultivo.nombre] || 0) + cultivo.cantidad_estimado;
+                    return acc;
+                }, {});
+
+                const datosParaChart = Object.keys(produccionPorMes).map(mes => {
+                    const datosMes = { mes };
+                    cultivosEsperados.forEach(nombreCultivo => {
+                        datosMes[nombreCultivo] = produccionPorMes[mes][nombreCultivo] || 0;
+                    });
+                    return datosMes;
+                });
+                
+                setDatosGrafica(datosParaChart);
+                analizarTendencias(cultivosFiltrados);
+
             } catch (error) {
-                console.error("Error obteniendo los cultivos", error);
+                console.error("Error obteniendo los datos para la gráfica", error);
+                setMensajeRecomendacion("Error al cargar los datos. Intenta de nuevo más tarde.");
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        obtenerCultivos();
+        obtenerYProcesarCultivos();
     }, [fechaInicio, fechaFin]);
 
-    const analizarTendencias = (datos) => {
-        let recomendacion = " Recomendación: ";
-        let sugerencias = {};
-
-        datos.forEach(({ mes, ...cultivos }) => {
-            Object.entries(cultivos).forEach(([cultivo, cantidad]) => {
-                if (cultivo.startsWith("Falta:")) {
-                    const nombreCultivo = cultivo.replace("Falta: ", "");
-                    sugerencias[mes] = sugerencias[mes] || [];
-                    sugerencias[mes].push(nombreCultivo);
-                }
-            });
+    const analizarTendencias = (cultivos) => {
+        const produccionTotal = cultivosEsperados.reduce((acc, nombreCultivo) => ({...acc, [nombreCultivo]: 0}), {});
+        cultivos.forEach(c => {
+            if (produccionTotal[c.nombre] !== undefined) {
+                produccionTotal[c.nombre] += c.cantidad_estimado;
+            }
         });
+        
+        const cultivosRecomendados = cultivosEsperados.filter(
+            nombreCultivo => produccionTotal[nombreCultivo] < UMBRAL_PRODUCCION_BAJA
+        );
 
-        if (Object.keys(sugerencias).length > 0) {
-            recomendacion += "\n Proyección: Para equilibrar la oferta, podrías sembrar:";
-            Object.entries(sugerencias).forEach(([mes, cultivos]) => {
-                recomendacion += `\n En ${mes}: ${cultivos.join(", ")}.`;
-            });
+        if (cultivosRecomendados.length > 0) {
+            setMensajeRecomendacion(`Recomendación: La producción de ${cultivosRecomendados.join(", ")} es baja. ¡Considera sembrarlos!`);
         } else {
-            recomendacion += "La producción está equilibrada.";
+            setMensajeRecomendacion("¡Buen trabajo! La producción de todos los cultivos está equilibrada.");
         }
-
-        return recomendacion;
     };
+    
+    const coloresCultivos = cultivosEsperados.reduce((acc, nombre, index) => {
+        const colores = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
+        acc[nombre] = colores[index % colores.length];
+        return acc;
+    }, {});
 
     return (
-        <div>
+        <div className="min-h-screen bg-gray-50">
             <Navbar />
-        <div className="grafico-container">
-            
-            <h2>Producción de Cultivos y Sugerencias</h2>
-            <div className="calendario-container">
-                <div className="calendario-item">
-                    <label>Fecha Inicio:</label>
-                    <DatePicker
-                        selected={fechaInicio}
-                        onChange={(date) => setFechaInicio(date)}
-                        locale="es"
-                    />
+            {/* Contenedor principal con clases de Tailwind */}
+            <div className="container mx-auto my-10 rounded-lg bg-white p-8 text-center shadow-lg">
+                <h2 className="mb-6 text-2xl font-bold uppercase tracking-wider text-gray-700">
+                    Producción de Cultivos por Mes
+                </h2>
+                
+                {/* Contenedor de calendarios */}
+                <div className="my-6 flex flex-col items-center justify-center gap-6 sm:flex-row">
+                    <div className="flex flex-col items-center">
+                        <label className="mb-2 block font-semibold text-gray-600">Fecha Inicio:</label>
+                        <DatePicker 
+                            selected={fechaInicio} 
+                            onChange={date => setFechaInicio(date)} 
+                            locale="es" 
+                            selectsStart 
+                            startDate={fechaInicio} 
+                            endDate={fechaFin}
+                            className="w-full rounded-md border border-gray-300 p-2 text-center"
+                        />
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <label className="mb-2 block font-semibold text-gray-600">Fecha Fin:</label>
+                        <DatePicker 
+                            selected={fechaFin} 
+                            onChange={date => setFechaFin(date)} 
+                            locale="es" 
+                            selectsEnd 
+                            startDate={fechaInicio} 
+                            endDate={fechaFin} 
+                            minDate={fechaInicio}
+                            className="w-full rounded-md border border-gray-300 p-2 text-center"
+                        />
+                    </div>
                 </div>
-                <div className="calendario-item">
-                    <label>Fecha Fin:</label>
-                    <DatePicker
-                        selected={fechaFin}
-                        onChange={(date) => setFechaFin(date)}
-                        locale="es"
-                    />
+
+                {/* Contenedor de la gráfica */}
+                <div className="mt-8 h-96 w-full">
+                    {isLoading ? (
+                        <p>Cargando datos de la gráfica...</p>
+                    ) : datosGrafica.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={datosGrafica} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="mes" />
+                                <YAxis label={{ value: 'Producción (kg)', angle: -90, position: 'insideLeft' }} />
+                                <Tooltip />
+                                <Legend />
+                                {cultivosEsperados.map((nombreCultivo) => (
+                                    <Bar key={nombreCultivo} dataKey={nombreCultivo} fill={coloresCultivos[nombreCultivo]} />
+                                ))}
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="flex h-full items-center justify-center">
+                            <p className="mt-8 text-xl text-orange-600">No hay datos para mostrar en el período seleccionado.</p>
+                        </div>
+                    )}
                 </div>
+                
+                {/* Mensaje de recomendación */}
+                {!isLoading && (
+                     <p className="mt-8 inline-block whitespace-pre-line rounded-md bg-orange-100 p-4 font-semibold text-orange-700">
+                        {mensajeRecomendacion}
+                    </p>
+                )}
             </div>
-            {datosCultivo.length > 0 ? (
-                <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={datosCultivo} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <XAxis dataKey="mes" />
-                        <YAxis label={{ value: 'Cantidad (kg)', angle: -90, position: 'insideLeft' }} />
-                        <Tooltip />
-                        <Legend />
-                        {Object.keys(datosCultivo[0] || {}).filter((key) => key !== "mes").map((cultivo) => (
-                            <Bar
-                                key={cultivo}
-                                dataKey={cultivo}
-                                fill={cultivo.startsWith("Falta:") ? "#e74c3c" : `#${Math.floor(Math.random() * 16777215).toString(16)}`}
-                            />
-                        ))}
-                    </BarChart>
-                </ResponsiveContainer>
-            ) : (
-                <p className="mensaje-sin-datos">{mensajeRecomendacion}</p>
-            )}
-            <p className="recomendacion">{mensajeRecomendacion}</p>
-        </div>
         </div>
     );
 };

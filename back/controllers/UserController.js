@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.JWT_SECRET || "sia2025yonatan";
 
-// 📌 Registrar usuario
+// Registrar usuario
 const register = async (req, res) => {
   try {
     const { nombre,ubicacion,email, password } = req.body;
@@ -27,7 +27,7 @@ const register = async (req, res) => {
   }
 };
 
-// 📌 Login de usuario
+// Login de usuario
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;

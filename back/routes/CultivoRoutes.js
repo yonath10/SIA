@@ -1,9 +1,11 @@
 const express = require("express");
-const { crearCultivo, obtenerCultivos, actualizarCultivo, eliminarCultivo } = require("../controllers/CultivoController");
+const { crearCultivo, obtenerCultivos, actualizarCultivo, eliminarCultivo, proyeccionCosecha } = require("../controllers/CultivoController");
 const verificarToken = require("../middlewares/authMiddleware");
 const Cultivo = require("../models/Cultivo"); // Asegúrate de importar el modelo
 
 const router = express.Router();
+
+  router.get("/proyeccion-cosecha", proyeccionCosecha);
 
 // ✅ Crear cultivo (protegido)
 router.post("/crearCultivo", verificarToken, crearCultivo);
@@ -40,5 +42,6 @@ router.get("/todosCultivos",  async (req, res) => {
     res.status(500).json({ message: "Error al obtener los cultivos." });
   }
 });
+
 
 module.exports = router;
